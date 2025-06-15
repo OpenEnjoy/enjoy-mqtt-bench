@@ -1,0 +1,49 @@
+# MQTT性能测试工具配置文件
+
+# 并发客户端数量
+concurrent_clients: 10
+
+# 消息发送速率(条/秒)
+message_rate: 100
+
+# 测试持续时间(秒)
+test_duration: 60
+
+# MQTT broker URL
+broker_url: "tcp://localhost:1883"
+
+# 测试消息主题
+topic: "test/performance"
+
+# 消息大小(字节)
+message_size: 256
+
+# QoS级别(0,1,2)
+qos: 1
+
+# MQTT版本(3.1.1或5.0)
+mqtt_version: "3.1.1"
+
+# 指标统计窗口大小(秒)
+metrics_window_size: 10
+
+# 结果输出方式(console,json,csv)
+result_output: "console"
+
+# 客户端ID前缀
+client_id_prefix: "mqtt-bench-"
+
+# MQTT连接用户名
+username: ""
+
+# MQTT连接密码
+password: ""
+
+# 是否使用清洁会话
+clean_session: true
+
+# 保活时间(秒)
+keep_alive: 60
+
+# 最大重连间隔(秒)
+max_reconnect_interval: 30
