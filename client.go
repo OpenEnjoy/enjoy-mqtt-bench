@@ -204,12 +204,10 @@ func (f *MQTTClientFactory) CreateClients(count int) ([]*MQTTClient, error) {
 	var clients []*MQTTClient
 	var wg sync.WaitGroup
 	errChan := make(chan error, count)
+	createdChan := make(chan *MQTTClient, count) // 用于收集成功创建的客户端
 
 	// 限制并发创建客户端的数量
-	concurrency := 10
-	if count < concurrency {
-		concurrency = count
-	}
+	concurrency := count
 	limiter := make(chan struct{}, concurrency)
 
 	for i := 0; i < count; i++ {
@@ -231,18 +229,29 @@ func (f *MQTTClientFactory) CreateClients(count int) ([]*MQTTClient, error) {
 				return
 			}
 
-			clients = append(clients, client)
+			// 安全存储客户端
+			createdChan <- client
 		}()
 	}
 
 	wg.Wait()
 	close(errChan)
+	close(createdChan)
+
+	// 收集所有成功创建的客户端
+	for client := range createdChan {
+		clients = append(clients, client)
+	}
 
 	// 检查是否有错误
 	if len(errChan) > 0 {
 		var errMsg string
 		for err := range errChan {
 			errMsg += err.Error() + "; "
+		}
+		// 释放已创建的所有客户端
+		for _, client := range clients {
+			client.Disconnect()
 		}
 		return nil, fmt.Errorf("创建客户端时发生错误: %s", errMsg)
 	}
