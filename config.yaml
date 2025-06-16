@@ -1,7 +1,7 @@
 # MQTT性能测试工具配置文件
 
 # 并发客户端数量
-concurrent_clients: 10
+concurrent_clients: 1
 
 # 消息发送速率(条/秒)
 message_rate: 100
@@ -47,3 +47,17 @@ keep_alive: 60
 
 # 最大重连间隔(秒)
 max_reconnect_interval: 30
+
+message:
+  type: "fixed"       # 可选值: random 或 file
+  length: 1024         # 随机消息长度，仅当 type 为 random 时生效
+  file_path: "msg.txt" # 消息文件路径，仅当 type 为 file 时生效
+  context: |
+    {
+      "id": "2a72ddb8-7a84-4a57-b745-97698716fb9e",
+      "method": "thing.event.property.post",
+      "params": {
+        "leak": 3
+      },
+      "version":"1.0.0"
+    }

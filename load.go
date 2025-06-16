@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"sync"
@@ -137,17 +138,43 @@ func generateTestMessage(config *Config) ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	// 创建随机字节数组
-	b := make([]byte, size)
-	_, err := rand.Read(b)
-	if err != nil {
-		// 如果随机生成失败，使用固定模式填充
-		for i := 0; i < size; i++ {
-			b[i] = byte(i % 256)
+	// 根据配置选择消息生成方式
+	switch config.Message.Type {
+	case "file":
+		// 从文件读取消息内容
+		if config.Message.FilePath == "" {
+			return nil, fmt.Errorf("文件路径未配置")
 		}
-	}
+		content, err := ioutil.ReadFile(config.Message.FilePath)
+		if err != nil {
+			return nil, fmt.Errorf("读取消息文件失败: %v", err)
+		}
+		return content, nil
 
-	return []byte(b), nil
+	case "random", "": // 默认使用随机生成
+		// 确保长度配置有效
+		if config.Message.Length <= 0 {
+			config.Message.Length = 1024 // 默认长度
+		}
+		// 生成固定长度的随机字符串
+		rand.Seed(time.Now().UnixNano())
+		letters := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		b := make([]byte, config.Message.Length)
+		for i := range b {
+			b[i] = letters[rand.Intn(len(letters))]
+		}
+		return b, nil
+
+	case "fixed":
+		// 使用固定字符串
+		if config.Message.Context == "" {
+			return nil, fmt.Errorf("固定消息内容未配置")
+		}
+		return []byte(config.Message.Context), nil
+
+	default:
+		return nil, fmt.Errorf("不支持的消息类型: %s", config.Message.Type)
+	}
 }
 
 // 生成自定义模式的消息

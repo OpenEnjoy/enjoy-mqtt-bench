@@ -28,6 +28,16 @@ type Config struct {
 	CleanSession         bool   `mapstructure:"clean_session"`
 	KeepAlive            int    `mapstructure:"keep_alive"`
 	MaxReconnectInterval int    `mapstructure:"max_reconnect_interval"`
+
+	Message MessageConfig `mapstructure:"message"`
+}
+
+// 消息配置
+type MessageConfig struct {
+	Type     string `mapstructure:"type"`      // 消息类型: random, file, fixed
+	Length   int    `mapstructure:"length"`    // 当 type 为 random 时的消息长度
+	FilePath string `mapstructure:"file_path"` // 当 type 为 file 时的文件路径
+	Context  string `mapstructure:"context"`   // 当 type 为 fixed 时的消息内容
 }
 
 // 加载配置文件
