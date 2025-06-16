@@ -42,10 +42,10 @@ func loadConfig(filePath string) error {
 	// 设置默认值
 	setDefaults()
 
-	// 读取环境变量
-	viper.AutomaticEnv()
+	// 先读取环境变量, bug: 配置中的username会被环境变量-电脑名覆盖
+	// viper.AutomaticEnv()
 
-	// 如果配置文件存在，则读取配置文件
+	// 再读取配置文件（配置文件优先级更高）
 	if _, err := os.Stat(filePath); err == nil {
 		if err := viper.ReadInConfig(); err != nil {
 			return fmt.Errorf("读取配置文件失败: %v", err)
